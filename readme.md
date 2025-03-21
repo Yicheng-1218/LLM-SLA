@@ -2,7 +2,8 @@
 <a href="./readme_tw.md">中文說明</a>
 
 ## Introduction
-This project is an application designed for managing and testing AI services using Playwright to automate web interactions. It is flexible and can be extended to different types of web applications by simply adding a corresponding configuration file for each service. Additionally, users can customize the runner to adjust pre and post test processing logic.
+LLM-SLA is a versatile application designed for managing and testing AI services. It leverages Playwright for automated web interactions, providing a flexible framework that can be extended to various web applications by simply adding a corresponding configuration file for each service. With a user-friendly Flask web interface, users can easily manage configurations, execute tests, and view results. Additionally, the framework allows users to customize the runner to adjust pre- and post-test processing logic.
+
 
 ## Features
 - **Web Interface**: Utilizes Flask to provide a simple web interface where users can manage configurations, execute tests, and view usage instructions.
