@@ -1,0 +1,25 @@
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Logs
+Project/logs
+
+# Services runner
+Project/services/*
+!Project/services/template_runner.py
+
+# Configs
+Project/configs/*
+!Project/configs/.gitkeep
+
+# Tests
+test

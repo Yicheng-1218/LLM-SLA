@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>AI 服務負載測試</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+
+            .highlight {
+                font-weight: bold;
+                color: #198754;
+            }
+
+            .config-preview {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 4px;
+                margin-top: 20px;
+                white-space: pre-wrap;
+                font-family: monospace;
+            }
+
+            .nav-tabs .nav-link.active {
+                background-color: #198754;
+                color: white;
+                border-color: #198754;
+            }
+
+            .nav-tabs .nav-link {
+                color: #212529;
+            }
+
+            pre {
+                background-color: #f8f9fa;
+                padding: 10px;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1 class="mb-4">AI 服務負載測試 (對話類型 Ex:ChatGPT)</h1>
+
+            <!-- Tab 導航 -->
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="config-tab" data-bs-toggle="tab" data-bs-target="#configContent"
+                        type="button" role="tab">新增配置</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#editContent"
+                        type="button" role="tab">修改配置</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="test-tab" data-bs-toggle="tab" data-bs-target="#testContent"
+                        type="button" role="tab">執行測試與結果</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="guide-tab" data-bs-toggle="tab" data-bs-target="#guideContent"
+                        type="button" role="tab">使用教學</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#infoContent"
+                        type="button" role="tab">指標解析</button>
+                </li>
+            </ul>
+
+            <!-- Tab 內容 -->
+            <div class="tab-content" id="myTabContent">
+                <!-- 配置設定 Tab -->
+                <div class="tab-pane fade show active" id="configContent" role="tabpanel">
+                    <div class="mb-3 row">
+                        <label for="serviceName" class="col-sm-3 col-form-label">AI 服務名稱：</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="serviceName">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="url" class="col-sm-3 col-form-label">AI 服務網址：</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="url">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="inputSelector" class="col-sm-3 col-form-label">文字輸入框位置：</label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="inputSelector"
+                                    placeholder="例如: textarea.input-bar">
+                                <button class="btn btn-outline-secondary" id="detectButton"
+                                    onclick="detectInputSelector()">自動偵測</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="responseSelector" class="col-sm-3 col-form-label">AI 回覆位置：</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="responseSelector"
+                                placeholder="例如: xpath=//div[contains(@class, 'response')]">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="testPrompts" class="col-sm-3 col-form-label">測試提示詞：</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="testPrompts" rows="4" placeholder="每行一個提示詞"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="headless" class="col-sm-3 col-form-label">隱藏測試過程：</label>
+                        <div class="col-sm-9">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="headless" checked>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="concurrency" class="col-sm-3 col-form-label">同時使用人數：</label>
+                        <div class="col-sm-9">
+                            <input type="number" class="form-control" id="concurrency" value="1" min="1">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="testDuration" class="col-sm-3 col-form-label">測試持續時間(秒)：</label>
+                        <div class="col-sm-9">
+                            <input type="number" class="form-control" id="testDuration" value="60" min="1">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-9 offset-sm-3">
+                            <div class="text-danger">*以上皆為必填</div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-sm-9 offset-sm-3">
+                            <button class="btn btn-success" onclick="saveConfig()">儲存配置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 修改配置 Tab -->
+                <div class="tab-pane fade" id="editContent" role="tabpanel">
+                    <div class="mb-3 row">
+                        <label for="editConfigSelect" class="col-sm-3 col-form-label">選擇配置：</label>
+                        <div class="col-sm-9">
+                            <select class="form-select" id="editConfigSelect" onchange="loadConfigForEdit()">
+                                <option value="">請選擇配置檔</option>
+                                {% for config in configs %}
+                                <option value="{{ config }}">{{ config }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 編輯表單 -->
+                    <div id="editForm" style="display: none;">
+                        <div class="mb-3 row">
+                            <label for="editServiceName" class="col-sm-3 col-form-label">AI 服務名稱：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="editServiceName" readonly>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editUrl" class="col-sm-3 col-form-label">AI 服務網址：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="editUrl">
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editInputSelector" class="col-sm-3 col-form-label">文字輸入框位置：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="editInputSelector">
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editResponseSelector" class="col-sm-3 col-form-label">AI 回覆位置：</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="editResponseSelector">
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editTestPrompts" class="col-sm-3 col-form-label">測試提示詞：</label>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" id="editTestPrompts" rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editHeadless" class="col-sm-3 col-form-label">隱藏測試過程：</label>
+                            <div class="col-sm-9">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="editHeadless">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editConcurrency" class="col-sm-3 col-form-label">同時使用人數：</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" id="editConcurrency" min="1">
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label for="editTestDuration" class="col-sm-3 col-form-label">測試持續時間(秒)：</label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" id="editTestDuration" min="1">
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <div class="col-sm-9 offset-sm-3">
+                                <button class="btn btn-success me-2" onclick="updateConfig()">更新配置</button>
+                                <button class="btn btn-danger" onclick="deleteConfig()">刪除配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 執行測試 Tab -->
+                <div class="tab-pane fade" id="testContent" role="tabpanel">
+                    <div class="mb-3 row">
+                        <label for="testConfigSelect" class="col-sm-3 col-form-label">選擇配置：</label>
+                        <div class="col-sm-9">
+                            <select class="form-select" id="testConfigSelect" onchange="showConfigDetails()">
+                                <option value="">請選擇配置檔</option>
+                                {% for config in configs %}
+                                <option value="{{ config }}">{{ config }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="config-preview" id="configPreview"></div>
+                    <button class="btn btn-success mt-3" onclick="runTest()">開始測試</button>
+                    <div class="results mt-4" id="results"></div>
+                </div>
+
+                <!-- 使用教學 Tab -->
+                <div class="tab-pane fade" id="guideContent" role="tabpanel">
+                    <h2 class="mb-4">配置表填寫教學</h2>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">AI 服務名稱</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>填寫您要測試的 AI 服務名稱，例如「ChatGPT」、「Claude」等。此名稱將用於識別不同的配置檔案。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">AI 服務網址</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>輸入 AI 服務的完整網址，例如「https://chat.openai.com」。確保包含 https:// 前綴。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">文字輸入框位置</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>指定網頁上用於輸入提示詞的元素選擇器。您可以：</p>
+                            <ul>
+                                <li>手動填寫 CSS 選擇器，例如「textarea.input-bar」或「#chat-input」</li>
+                                <li>點擊「自動偵測」按鈕，系統會嘗試自動找出輸入框</li>
+                            </ul>
+                            <p>提示：CSS 選擇器通常可以在瀏覽器開發者工具中找到（按 F12 開啟）</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">AI 回覆位置</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>指定網頁上 AI 回應內容的元素選擇器。可以使用：</p>
+                            <ul>
+                                <li>CSS 選擇器：例如「div.response-content」</li>
+                                <li>XPath：以「xpath=」開頭，例如「xpath=//div[contains(@class, 'response')]」</li>
+                            </ul>
+                            <p>這個選擇器<span class="highlight">用於識別 AI 的回應文字</span>，以便系統計算回應時間和 Token 生成速度。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">測試提示詞</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>輸入您想要發送給 AI 的提示詞，<span class="highlight">每行一個</span>。系統會在測試過程中依序選擇這些提示詞。</p>
+                            <p>建議：</p>
+                            <ul>
+                                <li>提供多樣化的提示詞以測試不同類型的回應</li>
+                                <li>包含短句和長句</li>
+                                <li>考慮加入一些需要思考的問題</li>
+                            </ul>
+                            <p>範例提示詞：</p>
+                            <pre>解釋量子力學的基本原理
+請寫一首關於春天的短詩
+如何有效管理時間？
+列出五種健康的早餐選擇</pre>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">隱藏測試過程</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>勾選此選項會在測試過程中<span class="highlight">隱藏瀏覽器視窗</span>在背景執行測試。取消勾選則讓您可以觀察測試執行情況。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">同時使用人數</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>設定模擬多少用戶同時使用 AI 服務。數字越大，對 AI 服務的壓力越大。</p>
+                            <p>建議：從小數值開始測試（如 1-3），確認一切正常後再逐步增加。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">測試持續時間(秒)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>設定測試執行的總時間<span class="highlight">（以秒為單位）</span>。較長的測試時間可以獲得更準確的結果，但也會消耗更多資源。</p>
+                            <p>建議：一般測試可設定 60-300 秒（1-5 分鐘）。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">配置完成後</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>點擊「儲存配置」按鈕保存您的設定，然後可以在「執行測試與結果」頁面中選擇此配置並開始測試。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結果說明 Tab -->
+                <div class="tab-pane fade" id="infoContent" role="tabpanel">
+                    <h2 class="mb-4">測試指標說明</h2>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">併發數量</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>這代表同一時間有 <span class="highlight">多少使用者</span> 在與 AI 服務對話。這可以模擬多個人同時發送請求，測試系統在多人併發時的回應能力。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">總測試時間</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>紀錄這次負載測試總共執行了多久時間。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">錯誤率</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>所有請求的成功與否，<span class="highlight">錯誤率 = (失敗請求 ÷ 總請求數) ×
+                                    100%</span>，如果錯誤率很高，可能代表系統在高併發時會崩潰或超時，導致部分用戶無法獲得回應。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">總交易次數</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>在測試期間，系統總共處理了 <span class="highlight">多少對話請求</span>（每個請求通常是一條 AI 回應）。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">每秒多少 Token</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>AI 生成回答時，它不會一次性給出完整句子，而是像打字一樣一個一個顯示。這個數字越高，代表 AI 的回應就越快越流暢。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">95% 的回應時間低於</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>這表示 <span class="highlight">95% 的請求</span> 會在這個時間內被伺服器開始處理，而不是卡住或延遲，只有 5%
+                                的請求比這個數值慢。這有助於說明系統在大多數情況下的表現。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">99% 的回應時間低於</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>這表示 <span class="highlight">99% 的請求</span> 會在這個時間內被伺服器開始處理，而不是卡住或延遲，只有 1%
+                                的請求比這個數值慢。這有助於檢查系統在極端情況下的表現。</p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">中位數第一個 Token 延遲</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>當你問 AI 一個問題，它需要多少時間才會開始回應。這數字越低，代表 AI 反應越快。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS 和 Popper.js -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // 切換 Tab (使用 Bootstrap 的 Tab 功能，不需要自己實現)
+
+            // 顯示配置詳情
+            function showConfigDetails() {
+                const selectedConfig = document.getElementById('testConfigSelect').value;
+                if (!selectedConfig) {
+                    document.getElementById('configPreview').textContent = '';
+                    return;
+                }
+
+                fetch(`/get_config/${selectedConfig}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('configPreview').textContent =
+                            JSON.stringify(data, null, 2);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('configPreview').textContent =
+                            '載入配置時發生錯誤';
+                    });
+            }
+
+            // 儲存配置
+            function saveConfig() {
+                const prompts = document.getElementById('testPrompts').value
+                    .split('\n')
+                    .filter(line => line.trim() !== '');
+
+                const config = {
+                    name: document.getElementById('serviceName').value,
+                    url: document.getElementById('url').value,
+                    input_selector: document.getElementById('inputSelector').value,
+                    response_selector: document.getElementById('responseSelector').value,
+                    test_prompts: prompts,
+                    headless: document.getElementById('headless').checked,
+                    concurrency: parseInt(document.getElementById('concurrency').value),
+                    test_duration: parseInt(document.getElementById('testDuration').value)
+                };
+
+                fetch('/create_config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('配置已儲存');
+                            location.reload();
+                        } else {
+                            alert('儲存失敗：' + data.message);
+                        }
+                    })
+                    .catch(error => alert('儲存時發生錯誤：' + error));
+            }
+
+            // 載入配置進行編輯
+            function loadConfigForEdit() {
+                const selectedConfig = document.getElementById('editConfigSelect').value;
+                if (!selectedConfig) {
+                    document.getElementById('editForm').style.display = 'none';
+                    return;
+                }
+
+                fetch(`/get_config/${selectedConfig}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('editForm').style.display = 'block';
+                        document.getElementById('editServiceName').value = data.name;
+                        document.getElementById('editUrl').value = data.url;
+                        document.getElementById('editInputSelector').value = data.input_selector;
+                        document.getElementById('editResponseSelector').value = data.response_selector;
+                        document.getElementById('editTestPrompts').value = data.test_prompts.join('\n');
+                        document.getElementById('editHeadless').checked = data.headless;
+                        document.getElementById('editConcurrency').value = data.concurrency;
+                        document.getElementById('editTestDuration').value = data.test_duration;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('載入配置時發生錯誤');
+                    });
+            }
+
+            // 更新配置
+            function updateConfig() {
+                const config = {
+                    name: document.getElementById('editServiceName').value,
+                    url: document.getElementById('editUrl').value,
+                    input_selector: document.getElementById('editInputSelector').value,
+                    response_selector: document.getElementById('editResponseSelector').value,
+                    test_prompts: document.getElementById('editTestPrompts').value
+                        .split('\n')
+                        .filter(line => line.trim() !== ''),
+                    headless: document.getElementById('editHeadless').checked,
+                    concurrency: parseInt(document.getElementById('editConcurrency').value),
+                    test_duration: parseInt(document.getElementById('editTestDuration').value)
+                };
+
+                fetch('/update_config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('配置已更新');
+                            location.reload();
+                        } else {
+                            alert('更新失敗：' + data.message);
+                        }
+                    })
+                    .catch(error => alert('更新時發生錯誤：' + error));
+            }
+
+            // 刪除配置
+            function deleteConfig() {
+                const configName = document.getElementById('editServiceName').value;
+                if (!confirm(`確定要刪除配置 "${configName}" 嗎？`)) {
+                    return;
+                }
+
+                fetch(`/delete_config/${configName}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('配置已刪除');
+                            location.reload();
+                        } else {
+                            alert('刪除失敗：' + data.message);
+                        }
+                    })
+                    .catch(error => alert('刪除時發生錯誤：' + error));
+            }
+
+            // 自動偵測文字輸入框位置
+            function detectInputSelector() {
+                const url = document.getElementById('url').value;
+                if (!url) {
+                    alert('請先輸入 AI 服務的 URL');
+                    return;
+                }
+                const detectButton = document.getElementById('detectButton');
+                const inputSelector = document.getElementById('inputSelector');
+                detectButton.disabled = true;
+                inputSelector.value = "偵測中...";
+                inputSelector.disabled = true;
+                const formData = new FormData();
+                formData.append('url', url);
+                fetch('/detect_selector', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            inputSelector.value = data.selector;
+                            inputSelector.disabled = false;
+                            detectButton.disabled = false;
+                        } else {
+                            inputSelector.value = data.message;
+                            inputSelector.disabled = false;
+                            detectButton.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        inputSelector.value = error;
+                        inputSelector.disabled = false;
+                        detectButton.disabled = false;
+                    });
+            }
+
+            // 執行測試
+            function runTest() {
+                const selectedConfig = document.getElementById('testConfigSelect').value;
+                if (!selectedConfig) {
+                    alert('請先選擇配置檔');
+                    return;
+                }
+
+                // 更新UI狀態
+                const resultDiv = document.getElementById('results');
+                resultDiv.innerHTML = '';
+                let elapsedTime = 0;
+                const timer = setInterval(() => {
+                    elapsedTime += 1;
+                    resultDiv.innerHTML = `<div class="alert alert-info mt-3">測試執行中，請稍候... 已經過 ${elapsedTime} 秒</div>`;
+                }, 1000);
+
+                // 建立 FormData
+                const formData = new FormData();
+                formData.append('service', selectedConfig);
+
+                // 發送請求
+                fetch('/run_test', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // 清除計時器
+                        timer && clearInterval(timer);
+
+                        if (data.status === 'success') {
+                            // 格式化並顯示結果
+                            const results = data.results;
+                            resultDiv.innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <pre class="mb-0">${results}</pre>
+                        </div>`;
+                        } else {
+                            resultDiv.innerHTML = `
+                        <div class="alert alert-danger mt-3">
+                            測試執行失敗：${data.message}
+                        </div>`;
+                        }
+                    })
+                    .catch(error => {
+                        timer && clearInterval(timer);
+                        resultDiv.innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        執行時發生錯誤：${error}
+                    </div>`;
+                    });
+            }
+
+            // 頁面載入時初始化
+            document.addEventListener('DOMContentLoaded', function () {
+                // Bootstrap 5 已經自動處理 Tab 切換，不需要額外的初始化代碼
+            });
+        </script>
+    </body>
+
+</html>
