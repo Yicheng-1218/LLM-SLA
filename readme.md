@@ -14,11 +14,11 @@ LLM-SLA is a versatile application designed for managing and testing AI services
 ## Installation
 1. Clone this repository to your local machine:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Yicheng-1218/LLM-SLA.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd <project-directory>
+   cd https://github.com/Yicheng-1218/LLM-SLA.git
    ```
 3. Install the required Python packages:
    ```bash
