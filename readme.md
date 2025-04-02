@@ -77,4 +77,5 @@ LLM-SLA is a versatile application designed for managing and testing AI services
 Feel free to submit issues and requests, or directly send a Pull Request.
 
 ## License
-This project is licensed under the MIT License.
+This project is released under the MIT License. If you find it useful or would like to reference it in your work, attribution is appreciated!
+
