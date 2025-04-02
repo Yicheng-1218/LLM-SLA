@@ -12,11 +12,11 @@
 ## 安裝
 1. 將此存儲庫複製到本地：
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Yicheng-1218/LLM-SLA.git
    ```
 2. 進入專案目錄：
    ```bash
-   cd <project-directory>
+   cd https://github.com/Yicheng-1218/LLM-SLA.git
    ```
 3. 安裝所需的 Python 套件：
    ```bash
